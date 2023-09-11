@@ -19,7 +19,7 @@ function onSubscribe(req, res) {
   
   const {id, initial} = req.query;
   
-  if(initial && Object.keys(store).length) return res.json(store);
+  if(initial) return res.json(store);
 
   subscribers[id] = res;
 
@@ -47,6 +47,12 @@ function publish() {
 
 app.get('/subscribe', (req, res) => {
     onSubscribe(req, res);
+})
+
+app.get('/test', (req, res) => {
+    res.json({
+      success: true
+    })
 })
 
 app.post('/publish', (req, res) => {
