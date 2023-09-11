@@ -19,13 +19,13 @@ function onSubscribe(req, res) {
   
   const {id, initial} = req.query;
   
-  if(initial) return res.json(store);
+  if(initial && Object.keys(initial).length) return res.json(store);
 
   subscribers[id] = res;
 
-    console.log('## subscribing to id', id)
+  console.log('## subscribing to id', id)
 
-    console.log('--- subscribers:', Object.keys(subscribers))
+  console.log('--- subscribers:', Object.keys(subscribers))
 
   console.log(req.query)
 
