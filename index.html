@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<script>
+    // Sending messages, a simple POST
+    function PublishForm(form, url) {
+
+        function sendMessage(message) {
+            fetch(url, {
+                method: 'POST',
+                body: JSON.stringify({
+                    key: 'message',
+                    content: message
+                }),
+                headers: {
+                    "Content-Type": "application/json",
+                }
+            });
+        }
+
+        form.onsubmit = function() {
+            let message = form.message.value;
+            if (message) {
+                form.message.value = '';
+                sendMessage(message);
+            }
+            return false;
+        };
+    }
+
+    // Receiving messages with long polling
+    function SubscribePane(elem, url) {
+
+        function showMessage(message) {
+            let messageElem = document.createElement('div');
+            messageElem.append(message);
+            elem.append(messageElem);
+        }
+
+        async function subscribe(initial) {
+            let response = await fetch(initial ? `${url}&initial=true` : url);
+
+            if (response.status == 502) {
+                // Connection timeout
+                // happens when the connection was pending for too long
+                // let's reconnect
+                await subscribe();
+            } else if (response.status != 200) {
+                // Show Error
+                showMessage(response.statusText);
+                // Reconnect in one second
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                await subscribe();
+            } else {
+                // Got message
+                let message = await response.text();
+                showMessage(message);
+                await subscribe();
+            }
+        }
+
+        subscribe(true);
+    }
+
+</script>
+
+All visitors of this page will see messages of each other.
+
+<form name="publish">
+  <input type="text" name="message" />
+  <input type="submit" value="Send" />
+</form>
+
+<div id="subscribe">
+</div>
+
+<script>
+    const url = 'http://localhost:8080';
+
+    new PublishForm(document.forms.publish, url + "/publish");
+    // random url parameter to avoid any caching issues
+    new SubscribePane(document.getElementById('subscribe'), url + '/subscribe?id=' + Math.random());
+</script>
