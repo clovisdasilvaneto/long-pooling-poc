@@ -67,7 +67,8 @@ app.post('/publish', (req, res) => {
 
     return;
 })
+const port = process.env.PORT || 8080
 
-app.listen(8080, function () {
-    console.log('web server listening on port 8080')
+app.listen(port, function () {
+    console.log('web server listening on port', port)
 })
